@@ -3,21 +3,32 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../api/axios";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 export default function AuthForm() {
   const [isSignup, setIsSignup] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const navigate = useNavigate();
+  const { login } = useAuth(); // use AuthContext
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (isSignup) {
+        // Signup
         await api.post("/auth/signup", form);
-        toast.success("Signup successful! Please login.");
-        setIsSignup(false);
+        toast.success("Signup successful! Logging in...");
+        // Automatically log in after signup
+        const res = await api.post("/auth/login", {
+          email: form.email,
+          password: form.password,
+        });
+        login(res.data); // set user and redirect
+        navigate("/notes");
       } else {
+        // Login
         const res = await api.post("/auth/login", form);
+        login(res.data); // set user and redirect
         toast.success(res.data.message || "Login successful!");
         navigate("/notes");
       }
@@ -27,19 +38,23 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 ">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500">
       <div className="bg-white shadow-xl rounded-2xl w-[380px] overflow-hidden relative px-4">
         <div className="relative flex border border-gray-300 rounded-xl mx-6 mt-8 mb-4 overflow-hidden">
-          <button className={`relative z-10 w-1/2 py-2 text-sm font-semibold transition-all duration-500 ${
+          <button
+            className={`relative z-10 w-1/2 py-2 text-sm font-semibold transition-all duration-500 ${
               !isSignup ? "text-white" : "text-gray-800"
             }`}
-            onClick={() => setIsSignup(false)}>
+            onClick={() => setIsSignup(false)}
+          >
             Login
           </button>
-          <button className={`relative z-10 w-1/2 py-2 text-sm font-semibold transition-all duration-500 ${
+          <button
+            className={`relative z-10 w-1/2 py-2 text-sm font-semibold transition-all duration-500 ${
               isSignup ? "text-white" : "text-gray-800"
             }`}
-            onClick={() => setIsSignup(true)}>
+            onClick={() => setIsSignup(true)}
+          >
             Signup
           </button>
 
@@ -49,7 +64,8 @@ export default function AuthForm() {
             }`}
           />
         </div>
-        <div className="relative min-h-[380px] px-6 pb-8 ">
+
+        <div className="relative min-h-[380px] px-6 pb-8">
           <AnimatePresence mode="wait">
             {!isSignup ? (
               <motion.form
@@ -67,7 +83,9 @@ export default function AuthForm() {
                     placeholder="Email Address"
                     required
                     value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, email: e.target.value })
+                    }
                     className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>

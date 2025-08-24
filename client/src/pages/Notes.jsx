@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 import toast from "react-hot-toast";
-import { useAuth } from "../context/AuthContext";
-
 import NoteCard from "../components/NoteCard";
 import NoteForm from "../components/NoteForm";
 import NoteExpanded from "../components/NoteExpanded";
@@ -20,7 +19,7 @@ export default function Notes() {
       const res = await api.get("/notes");
       setNotes(res.data);
     } catch (err) {
-      console.error("Fetch notes error:", err.response?.data || err.message);
+      console.error(err);
       toast.error("Failed to load notes");
     }
   };
@@ -28,6 +27,15 @@ export default function Notes() {
   useEffect(() => {
     if (user) fetchNotes();
   }, [user]);
+
+  if (!user) {
+    return (
+      <div className="text-center py-20">
+        <p>Please login to view notes.</p>
+      </div>
+    );
+  }
+
 
   const handleAdd = async (e) => {
     e.preventDefault();
