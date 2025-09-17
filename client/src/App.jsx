@@ -8,6 +8,7 @@ import Contact from "./pages/Contact";
 import AuthForm from "./pages/AuthForm";
 import Notes from "./pages/Notes";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import ConvaiWidget from "./elvnlabs/ConvaiWidget";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/signup" element={<AuthForm />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/elvnlabsbot" element={<ConvaiWidget/>} />
         <Route
           path="/notes"
           element={
